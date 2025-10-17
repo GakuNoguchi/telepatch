@@ -131,8 +131,8 @@ export default defineConfig({
   buildEnd: async (siteConfig) => {
     console.log('🔧 buildEnd hook: Copying Markdown files to dist...')
 
-    // Get the source directory (PUBLISH_DIR placeholder will be replaced during project creation)
-    const srcDir = path.resolve(__dirname, '../../PUBLISH_DIR')
+    // Get the source directory
+    const srcDir = path.resolve(__dirname, '../../edit/4.publish📚')
     const outDir = siteConfig.outDir
 
     console.log('Source directory:', srcDir)
