@@ -1,12 +1,29 @@
 /* ===== Eddie Essential Customizations ===== */
 
-/* Force light mode */
-html:not(.dark) {
+/* Force light mode - Disable dark mode completely */
+html {
   color-scheme: light !important;
 }
 
+/* Remove dark class if it exists (VitePress sometimes adds it) */
 html.dark {
-  color-scheme: light !important;
+  filter: none !important;
+}
+
+/* Override all dark mode CSS variables to use light mode values */
+html.dark {
+  --vp-c-bg: #ffffff !important;
+  --vp-c-bg-alt: #f6f6f7 !important;
+  --vp-c-bg-elv: #ffffff !important;
+  --vp-c-bg-soft: #f6f6f7 !important;
+
+  --vp-c-border: #c2c2c4 !important;
+  --vp-c-divider: #e2e2e3 !important;
+  --vp-c-gutter: #e2e2e3 !important;
+
+  --vp-c-text-1: rgba(60, 60, 67) !important;
+  --vp-c-text-2: rgba(60, 60, 67, 0.78) !important;
+  --vp-c-text-3: rgba(60, 60, 67, 0.56) !important;
 }
 
 /* Brand color override - Apple System Blue */

@@ -17,7 +17,7 @@ export default defineConfig({
   title: 'Humanitie',
   description: 'Documentation powered by Eddie',
 
-  appearance: 'light', // Force light mode
+  appearance: false, // Completely disable dark mode (false = no theme switcher, light mode only)
   ignoreDeadLinks: true,
 
   markdown: {

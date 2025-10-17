@@ -1,12 +1,43 @@
 import DefaultTheme from 'vitepress/theme'
-import { onMounted } from 'vue'
+import { onMounted, h } from 'vue'
 import './custom.css'
+import ChatBot from './ChatBot.vue'
 
 export default {
   extends: DefaultTheme,
+  Layout() {
+    return h(DefaultTheme.Layout, null, {
+      'layout-bottom': () => h(ChatBot)
+    })
+  },
   setup() {
     onMounted(() => {
       console.log('🔧 Eddie theme loaded!')
+
+      // Force remove dark mode class (prevent VitePress from enabling dark mode)
+      const removeDarkMode = () => {
+        document.documentElement.classList.remove('dark')
+      }
+
+      // Remove immediately
+      removeDarkMode()
+
+      // Watch for any attempts to add dark class
+      const darkModeObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (document.documentElement.classList.contains('dark')) {
+              console.log('⚠️ Dark mode detected, forcing light mode')
+              removeDarkMode()
+            }
+          }
+        })
+      })
+
+      darkModeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class']
+      })
 
       // Insert download button next to search button
       const insertDownloadButton = () => {
