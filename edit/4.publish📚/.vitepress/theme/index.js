@@ -1,15 +1,21 @@
 import DefaultTheme from 'vitepress/theme'
-import { onMounted, h } from 'vue'
+import { onMounted } from 'vue'
 import './custom.css'
-import ChatBot from './ChatBot.vue'
+
+// TODO: RAGチャット機能 - 将来的にVercel KV/Upstash Vectorで実装予定
+// 現在の実装（vector_store.jsonを直接読む方式）はVercel Serverless Functionsの制約により動作しない
+// 推奨アプローチ: Upstash Vector または Vercel KV + OpenAI embeddings
+// 参考: https://vercel.com/docs/storage/vercel-kv
+// import ChatBot from './ChatBot.vue'
 
 export default {
   extends: DefaultTheme,
-  Layout() {
-    return h(DefaultTheme.Layout, null, {
-      'layout-bottom': () => h(ChatBot)
-    })
-  },
+  // TODO: チャット機能を有効化する場合は以下のコメントを解除
+  // Layout() {
+  //   return h(DefaultTheme.Layout, null, {
+  //     'layout-bottom': () => h(ChatBot)
+  //   })
+  // },
   setup() {
     onMounted(() => {
       console.log('🔧 Eddie theme loaded!')
