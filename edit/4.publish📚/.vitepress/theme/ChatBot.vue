@@ -141,7 +141,7 @@ const sendMessage = async () => {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #3451b2;
+  background: #007AFF;
   color: white;
   border: none;
   cursor: pointer;
@@ -154,7 +154,7 @@ const sendMessage = async () => {
 }
 
 .chat-button:hover {
-  background: #2a3f8f;
+  background: #4DA2FF;
   transform: scale(1.05);
 }
 
@@ -179,7 +179,7 @@ const sendMessage = async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #3451b2;
+  background: #007AFF;
   color: white;
   border-radius: 12px 12px 0 0;
 }
@@ -241,7 +241,7 @@ const sendMessage = async () => {
 }
 
 .message.user .message-content {
-  background: #3451b2;
+  background: #007AFF;
   color: white;
 }
 
@@ -306,7 +306,7 @@ const sendMessage = async () => {
 }
 
 .chat-input input:focus {
-  border-color: #3451b2;
+  border-color: #007AFF;
 }
 
 .chat-input input:disabled {
@@ -316,7 +316,7 @@ const sendMessage = async () => {
 
 .chat-input button {
   padding: 10px 20px;
-  background: #3451b2;
+  background: #007AFF;
   color: white;
   border: none;
   border-radius: 8px;
@@ -327,7 +327,7 @@ const sendMessage = async () => {
 }
 
 .chat-input button:hover:not(:disabled) {
-  background: #2a3f8f;
+  background: #4DA2FF;
 }
 
 .chat-input button:disabled {
