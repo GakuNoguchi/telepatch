@@ -1,4 +1,25 @@
-import { vectorSearch } from 'eddie-vector-search';
+import OpenAI from 'openai';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Simple cosine similarity
+function cosineSimilarity(a, b) {
+  let dotProduct = 0;
+  let magnitudeA = 0;
+  let magnitudeB = 0;
+
+  for (let i = 0; i < a.length; i++) {
+    dotProduct += a[i] * b[i];
+    magnitudeA += a[i] * a[i];
+    magnitudeB += b[i] * b[i];
+  }
+
+  return dotProduct / (Math.sqrt(magnitudeA) * Math.sqrt(magnitudeB));
+}
 
 export default async function handler(req, res) {
   // CORS headers
@@ -26,23 +47,42 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    // ベクトル検索でドキュメントを取得
-    const searchResults = await vectorSearch(message, {
-      topK: 3,
-      docsDir: 'edit/4.publish📚'
-    });
-
-    // 検索結果をコンテキストとして整形
-    const context = searchResults
-      .map((result, i) => `[ドキュメント${i + 1}: ${result.file}]\n${result.content}`)
-      .join('\n\n---\n\n');
-
-    // OpenAI APIで回答生成
+    // OpenAI setup
     const openaiApiKey = process.env.OPENAI_API_KEY;
-
     if (!openaiApiKey) {
       return res.status(500).json({ error: 'OpenAI API key not configured' });
     }
+
+    const openai = new OpenAI({ apiKey: openaiApiKey });
+
+    // Load vector store
+    const vectorStorePath = path.join(process.cwd(), '.system', 'vector-data', 'vector_store.json');
+    if (!fs.existsSync(vectorStorePath)) {
+      return res.status(500).json({ error: 'Vector store not found. Please run reindex.' });
+    }
+
+    const vectorData = JSON.parse(fs.readFileSync(vectorStorePath, 'utf-8'));
+
+    // Generate query embedding
+    const embeddingResponse = await openai.embeddings.create({
+      model: 'text-embedding-3-small',
+      input: message,
+    });
+    const queryEmbedding = embeddingResponse.data[0].embedding;
+
+    // Search by cosine similarity
+    const results = vectorData.map(doc => ({
+      ...doc,
+      similarity: cosineSimilarity(queryEmbedding, doc.embedding),
+    }));
+
+    results.sort((a, b) => b.similarity - a.similarity);
+    const topResults = results.slice(0, 3);
+
+    // Format search results as context
+    const context = topResults
+      .map((result, i) => `[ドキュメント${i + 1}: ${result.metadata.filename}]\n${result.document}`)
+      .join('\n\n---\n\n');
 
     const systemPrompt = `あなたはHumanitieドキュメントのアシスタントです。
 以下のドキュメントから取得した情報を元に、ユーザーの質問に答えてください。
@@ -84,9 +124,9 @@ ${context}
 
     res.status(200).json({
       answer,
-      sources: searchResults.map(r => ({
-        file: r.file,
-        score: r.score
+      sources: topResults.map(r => ({
+        file: r.metadata.filename,
+        score: r.similarity
       }))
     });
 
