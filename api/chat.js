@@ -1,10 +1,6 @@
 import OpenAI from 'openai';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 // Simple cosine similarity
 function cosineSimilarity(a, b) {
@@ -56,12 +52,22 @@ export default async function handler(req, res) {
     const openai = new OpenAI({ apiKey: openaiApiKey });
 
     // Load vector store
-    const vectorStorePath = path.join(process.cwd(), '.system', 'vector-data', 'vector_store.json');
-    if (!fs.existsSync(vectorStorePath)) {
-      return res.status(500).json({ error: 'Vector store not found. Please run reindex.' });
+    const vectorStorePath = join(process.cwd(), '.system', 'vector-data', 'vector_store.json');
+
+    console.log('Looking for vector store at:', vectorStorePath);
+    console.log('CWD:', process.cwd());
+
+    if (!existsSync(vectorStorePath)) {
+      console.error('Vector store not found at:', vectorStorePath);
+      return res.status(500).json({
+        error: 'Vector store not found',
+        path: vectorStorePath,
+        cwd: process.cwd()
+      });
     }
 
-    const vectorData = JSON.parse(fs.readFileSync(vectorStorePath, 'utf-8'));
+    const vectorData = JSON.parse(readFileSync(vectorStorePath, 'utf-8'));
+    console.log('Vector store loaded, documents:', vectorData.length);
 
     // Generate query embedding
     const embeddingResponse = await openai.embeddings.create({
@@ -132,6 +138,11 @@ ${context}
 
   } catch (error) {
     console.error('Chat API error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 }
